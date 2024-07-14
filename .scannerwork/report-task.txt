@@ -1,0 +1,6 @@
+projectKey=backend-ts-redis-ms
+serverUrl=http://localhost:9000
+serverVersion=10.6.0.92116
+dashboardUrl=http://localhost:9000/dashboard?id=backend-ts-redis-ms
+ceTaskId=f6939a12-b94b-4e45-bfeb-e0de2b8810b3
+ceTaskUrl=http://localhost:9000/api/ce/task?id=f6939a12-b94b-4e45-bfeb-e0de2b8810b3

@@ -25,7 +25,7 @@ export default class UserController {
 			password: body?.password,
 		};
 
-		if (body.password || body.username) {
+		if (body.password && body.username) {
 			await authController.upsert({
 				id: user?.id,
 				username: user?.username,

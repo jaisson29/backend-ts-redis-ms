@@ -9,7 +9,7 @@ type Database = {
 };
 
 const db: Database = {
-	users: [{ id: '1', email: 'mikael.mayer@gmail.com' }],
+	users: [{ id: '01', email: 'mikael.mayer@gmail.com' }],
 	auth: [{ id: '1', username: 'jay', password: '12349' }],
 };
 
@@ -29,10 +29,11 @@ export default class Store {
 		return items.find((item: T) => item.id === id) ?? null;
 	}
 	async upsert<T extends TableItem>(table: keyof Database, data: T): Promise<T> {
+		console.log(table);
 		const items = await this.list(table);
-
-		console.log(data);
 		if (data.id) {
+			console.log(db);
+			console.log(data.id);
 			const index = items.findIndex((item) => item.id === data.id);
 			if (index !== -1) {
 				items[index] = { ...items[index], ...data };
@@ -41,6 +42,7 @@ export default class Store {
 			}
 		} else {
 			data.id = nanoid();
+			console.log(data);
 			items.push(data);
 		}
 
