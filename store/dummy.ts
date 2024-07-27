@@ -1,5 +1,4 @@
 import { nanoid } from 'nanoid';
-
 interface TableItem {
 	id: string;
 }
@@ -10,7 +9,7 @@ type Database = {
 
 const db: Database = {
 	users: [{ id: '01', email: 'mikael.mayer@gmail.com' }],
-	auth: [{ id: '1', username: 'jay', password: '12349' }],
+	auth: [{ id: '1', username: 'jay', password: '$2b$10$QqtnCYB3CrpypCjg8I2ZjemHB8rOATDd5/XfqyRmrxFAt4UqSc9Hy' }],
 };
 
 export default class Store {
@@ -29,23 +28,18 @@ export default class Store {
 		return items.find((item: T) => item.id === id) ?? null;
 	}
 	async upsert<T extends TableItem>(table: keyof Database, data: T): Promise<T> {
-		console.log(table);
 		const items = await this.list(table);
 		if (data.id) {
-			console.log(db);
-			console.log(data.id);
 			const index = items.findIndex((item) => item.id === data.id);
 			if (index !== -1) {
 				items[index] = { ...items[index], ...data };
 			} else {
-				throw new Error('No se encontro ningun registro para actualizar');
+				items.push(data);
 			}
 		} else {
 			data.id = nanoid();
-			console.log(data);
 			items.push(data);
 		}
-
 		return data;
 	}
 	async remove<T extends TableItem>(table: keyof Database, id: string): Promise<string> {

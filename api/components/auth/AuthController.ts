@@ -1,37 +1,43 @@
-import Authentication from '../../../auth';
-import Store from '../../../store/dummy';
+import Authentication from '../../../auth/Authentication';
+import { BadRequestError, UnauthorizedError } from '../../../network/AppError';
 import { Auth } from './AuthModel';
+import bcrypt from 'bcrypt';
+import { Store } from '../../../store/postgres';
+import logger from '../logger';
 
 export default class AuthController {
-	private readonly TABLE = 'auth';
+	private readonly TABLE = `}auth`;
 
 	constructor(private store: Store) {}
 
 	async login(data: Pick<Auth, 'username' | 'password'>) {
-		const auth = await this.store.query<Auth>(this.TABLE, { username: data.username });
-		const response = auth[0];
-		if (response && response.password === data?.password) {
-			return Authentication.sign(response);
-		} else {
-			throw new Error('Invalid info');
+		const [response] = await this.store.getFiltered<Auth>(this.TABLE, {
+			username: { table: this.TABLE, value: data.username },
+		});
+		if (!response) {
+			throw new UnauthorizedError('Invalid username or password2');
 		}
+
+		const compare = await bcrypt.compare(data.password, response.password);
+
+		if (!compare) {
+			throw new UnauthorizedError('Invalid username or password');
+		}
+		return Authentication.sign(response);
 	}
 
 	async upsert(data: Auth) {
+		if (!data.password || !data.username) {
+			throw new BadRequestError('password and username must be provided');
+		}
+
 		const authData: Auth = {
 			id: data.id,
-			username: '',
-			password: '',
+			username: data.username,
+			password: await bcrypt.hash(data.password, 10),
 		};
 
-		if (data.username) {
-			authData.username = data.username;
-		}
-
-		if (data.password) {
-			authData.password = data.password;
-		}
-
-		return this.store.upsert(this.TABLE, authData);
+		logger.debug(authData);
+		return this.store.upsert<Auth>(this.TABLE, authData);
 	}
 }
