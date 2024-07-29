@@ -3,7 +3,6 @@ import { authController } from '../auth';
 import { Auth } from '../auth/AuthModel';
 import logger from '../logger';
 import { User } from './UserModel';
-import { Follow } from '../follow/FollowModel';
 
 export default class UserController {
 	private readonly TABLE = `users`;
@@ -13,40 +12,24 @@ export default class UserController {
 	}
 
 	async list() {
-		return await this.store.getFiltered(`${this.TABLE}`, {}, true, [
-			{
-				table: 'auth',
-				on: {
-					field: 'id',
+		return await this.store.get(`${this.TABLE}`, {
+			join: [
+				{
+					table: 'auth',
+					on: {
+						field: 'id',
+					},
 				},
-			},
-		]);
-	}
-
-	async get(id: string) {
-		return await this.store.getFiltered<User>(this.TABLE, {
-			id: { table: this.TABLE, value: id },
+			],
 		});
 	}
 
-	async follow(idFrom: string, idTo: string) {
-		const userFrom = await this.store.get<User>(this.TABLE, idFrom);
-		const userTo = await this.store.get<User>(this.TABLE, idTo);
-		if (!userFrom || !userTo) {
-			throw new Error('User not found');
-		}
-		return this.store.upsert<Follow>('users_follow', new Follow(0, userFrom.id, userTo.id));
-	}
-
-	async following(id: string) {
-		return await this.store.getFiltered('users_follow', { userFrom: { table: 'users_follow', value: id } }, true, [
-			{
-				table: `users`,
-				on: {
-					field: 'userFrom',
-				},
+	async get(id: string) {
+		return await this.store.get<User>(this.TABLE, {
+			where: {
+				id: { table: this.TABLE, value: id },
 			},
-		]);
+		});
 	}
 
 	async upsert(body: User & Auth) {

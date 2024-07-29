@@ -4,7 +4,7 @@
 // 	userTo: number;
 // }
 
-export class Follow {
+export class UsersFollow {
 	id: number;
 	userFrom: number;
 	userTo: number;

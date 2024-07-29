@@ -3,6 +3,8 @@ import express, { Application } from 'express';
 import { api_port } from '../config';
 import userNetwork from './components/user/UserNetwork';
 import authNetwork from './components/auth/AuthNetwork';
+import postNetwork from './components/post/PostNetwork';
+import usersFollowNetwork from './components/usersFollow/UsersFollowNetwork';
 import SwaggerDoc from './swagger.json';
 import SwaggerUi from 'swagger-ui-express';
 import logger from './components/logger';
@@ -16,6 +18,8 @@ app.use(pinoHttp({ logger }));
 
 app.use('/api/v1/user', userNetwork);
 app.use('/api/v1/auth', authNetwork);
+app.use('/api/v1/post', postNetwork);
+app.use('/api/v1/follow', usersFollowNetwork);
 
 app.use('/api-docs', SwaggerUi.serve, SwaggerUi.setup(SwaggerDoc));
 

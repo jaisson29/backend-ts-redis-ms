@@ -6,13 +6,15 @@ import { Store } from '../../../store/postgres';
 import logger from '../logger';
 
 export default class AuthController {
-	private readonly TABLE = `}auth`;
+	private readonly TABLE = `auth`;
 
 	constructor(private store: Store) {}
 
 	async login(data: Pick<Auth, 'username' | 'password'>) {
-		const [response] = await this.store.getFiltered<Auth>(this.TABLE, {
-			username: { table: this.TABLE, value: data.username },
+		const [response] = await this.store.get<Auth>(this.TABLE, {
+			where: {
+				username: { table: this.TABLE, value: data.username },
+			},
 		});
 		if (!response) {
 			throw new UnauthorizedError('Invalid username or password2');

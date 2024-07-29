@@ -1,4 +1,4 @@
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool, QueryResult } from 'pg';
 import { PG_CONFIG } from '../config';
 import logger from '../api/components/logger';
 
@@ -66,7 +66,7 @@ export class Store {
 		await this.ensureConnected();
 		const client = await this.pool.connect();
 		try {
-			logger.debug(query, params);
+			logger.debug(params, query);
 			const res: QueryResult = await client.query(query, params);
 			return res.rows as T[];
 		} finally {
@@ -80,15 +80,23 @@ export class Store {
 		return rows.length > 0 ? rows : null;
 	}
 
-	public async getFiltered<T>(
+	public async get<T>(
 		table: string,
-		filters: Record<string, { table: string; value: unknown }> = {},
-		condition: boolean = true,
-		joinTables: { table: string; on: { field: string }; alias?: string }[] = [],
+		options: Partial<{
+			where: Record<string, { table: string; value: unknown }>;
+			orders: { sortField: string; sortType: 'ASC' | 'DESC' }[];
+			conditions: boolean;
+			join: { table: string; on: { field: string }; alias?: string }[];
+		}> = {},
 	): Promise<T[]> {
+		const where = options.where ?? {};
+		const orders = options.orders ?? [{ sortField: 'b.id', sortType: 'ASC' }];
+		const conditions = options.conditions ?? true;
+		const join = options.join ?? [];
+
 		const baseTableAlias = 'b';
 
-		const joinClauses = joinTables
+		const joinClauses = join
 			.map((join, index) => {
 				const alias = join.alias ?? `j${index + 1}`;
 				return `JOIN ${this.applySchema(join.table)} ${alias} ON b."${join.on.field}" = ${alias}."id"`;
@@ -97,56 +105,39 @@ export class Store {
 
 		const fromClause = `${this.applySchema(table)} ${baseTableAlias}`;
 
-		const whereClauses = Object.keys(filters)
+		const whereClauses = Object.keys(where)
 			.map((column, index) => {
-				const tableName = filters[column].table;
+				const tableName = where[column].table;
 				const tableAlias =
-					tableName === table ? baseTableAlias : joinTables.find((join) => join.table === table)?.alias ?? table;
+					tableName === table ? baseTableAlias : join.find((join) => join.table === table)?.alias ?? table;
 				return `${tableAlias}."${column}" = $${index + 1}`;
 			})
-			.join(condition ? ' AND ' : ' OR ');
+			.join(conditions ? ' AND ' : ' OR ');
 
-		const queryText = `SELECT * FROM ${fromClause} ${joinClauses} ${whereClauses ? 'WHERE ' + whereClauses : ''}`;
+		const sortClauses = orders.map((order) => {
+			return `${order.sortField} ${order.sortType}`;
+		});
+		const queryText = `SELECT * FROM ${fromClause} ${joinClauses} ${
+			whereClauses ? 'WHERE ' + whereClauses : ''
+		} ORDER BY ${sortClauses}`;
 
 		const rows = await this.query<T>(
 			queryText,
-			Object.values(filters).map((val) => val.value),
+			Object.values(where).map((val) => val.value),
 		);
 		return rows.length > 0 ? rows : [];
 	}
 
-	public async get<T>(
-		table: string,
-		id: Item['id'],
-		joinTables: { table: string; on: string; alias?: string }[] = [],
-	): Promise<T | null> {
-		const baseTableAlias = 'b';
-
-		const joinClauses = joinTables
-			.map((join, index) => {
-				const alias = join.alias ?? `j${index}`;
-				return `JOIN ${this.applySchema(join.table)} ${alias} ON ${alias}.${join.on}`;
-			})
-			.join(' ');
-
-		const queryText = `SELECT * FROM ${this.applySchema(
-			table,
-		)} ${baseTableAlias} ${joinClauses} WHERE ${baseTableAlias}.id = $1`;
-
-		const rows = await this.query<T>(queryText, [id]);
-		return rows.length > 0 ? rows[0] : null;
-	}
-
 	public async upsert<T extends Item>(table: string, data: T): Promise<T> {
-		return this.transaction(async (client: PoolClient) => {
-			const existing = data.id ? await this.get<T>(table, data.id) : null;
+		return this.transaction(async () => {
+			const [existing] = data.id ? await this.get<T>(table, { where: { id: { table: table, value: data.id } } }) : [];
 			let queryText: string;
 			let queryParams: unknown[];
 
 			if (existing) {
 				const { id, ...updateData } = data;
 				const keys = Object.keys(updateData);
-				const setteos = keys.map((key, index) => `${this.applySchema(key)} = $${index + 1}`).join(', ');
+				const setteos = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
 				queryText = `UPDATE ${this.applySchema(table)} SET ${setteos} WHERE id = $${keys.length + 1} RETURNING *`;
 				queryParams = [...Object.values(updateData), id];
 			} else {
@@ -161,32 +152,32 @@ export class Store {
 				queryParams = Object.values(insertData);
 			}
 
-			const res = await client.query(queryText, queryParams);
-			if (res.rows.length > 0) {
-				return res.rows[0] as T;
+			const res = await this.query(queryText, queryParams);
+			if (res.length > 0) {
+				return res[0] as T;
 			}
 			throw new Error('Operation failed');
 		});
 	}
 
 	public async remove<T>(table: string, id: Item['id']): Promise<Item['id']> {
-		return this.transaction(async (client: PoolClient) => {
-			const existing = await this.get<T>(table, id);
+		return this.transaction(async () => {
+			const [existing] = await this.get<T>(table, { where: { id: { table: table, value: id } } });
 			if (!existing) {
 				throw new Error('Item not found');
 			}
 			const queryText = `DELETE FROM ${this.applySchema(table)} WHERE id = $1`;
-			await client.query(queryText, [id]);
+			await this.query(queryText, [id]);
 			return id;
 		});
 	}
 
-	public async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
+	public async transaction<T>(callback: () => Promise<T>): Promise<T> {
 		await this.ensureConnected();
 		const client = await this.pool.connect();
 		try {
 			await client.query('BEGIN');
-			const result = await callback(client);
+			const result = await callback();
 			await client.query('COMMIT');
 			return result;
 		} catch (error) {

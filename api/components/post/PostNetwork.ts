@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response, Router } from 'express';
 import ApiResponse from '../../../network/response';
-import { userController, userSecure } from '.';
+import { postController } from '.';
+import { userSecure } from '../user';
 const router: Router = express.Router();
 
 // Paths
@@ -14,7 +15,7 @@ router.delete('/:id', remove);
 async function get(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { id } = req.params;
-		const data = await userController.get(id);
+		const data = await postController.get(id);
 		ApiResponse.success(req, res, data, 200);
 	} catch (error) {
 		next(error);
@@ -23,7 +24,7 @@ async function get(req: Request, res: Response, next: NextFunction) {
 
 async function list(req: Request, res: Response, next: NextFunction) {
 	try {
-		const data = await userController.list();
+		const data = await postController.list();
 		ApiResponse.success(req, res, data, 200);
 	} catch (error: unknown) {
 		next(error);
@@ -32,7 +33,7 @@ async function list(req: Request, res: Response, next: NextFunction) {
 
 async function upsert(req: Request, res: Response, next: NextFunction) {
 	try {
-		const response = await userController.upsert(req.body);
+		const response = await postController.upsert(req.body);
 		ApiResponse.success(req, res, response, 201);
 	} catch (error) {
 		next(error);
@@ -42,7 +43,7 @@ async function upsert(req: Request, res: Response, next: NextFunction) {
 async function remove(req: Request, res: Response, next: NextFunction) {
 	try {
 		const { id } = req.params;
-		const response = userController.remove(id);
+		const response = postController.remove(id);
 
 		ApiResponse.success(req, res, response, 200);
 	} catch (error: unknown) {

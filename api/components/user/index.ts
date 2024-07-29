@@ -1,5 +1,5 @@
 import UserController from './UserController';
-import UserSecure from './UserSecure';
+import UserSecure from '../middleware/UserSecure';
 import { Store } from '../../../store/postgres';
 import { PG_SCHEMA } from '../../../config';
 
