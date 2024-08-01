@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response, Router } from 'express';
 import ApiResponse from '../../../network/response';
 import { postController } from '.';
-import { userSecure } from '../user';
+import { userSecure } from '../../../api/components/user/';
 const router: Router = express.Router();
 
 // Paths

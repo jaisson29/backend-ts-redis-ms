@@ -98,5 +98,5 @@
 		] /* Specify multiple folders that act like './node_modules/@types'. */
 	},
 	"include": ["./**/*"],
-	"exclude": ["./node_modules"]
+	"exclude": ["./node_modules", "./dist"]
 }

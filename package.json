@@ -7,6 +7,8 @@
 		"build": "tsc",
 		"start": "ts-node api/index.ts",
 		"dev": "nodemon",
+		"dev:pg": "npm run lint & ts-node ./postgres/index.ts",
+		"dev:post": "npm run lint & ts-node ./post/index.ts",
 		"lint": "eslint . --ext .ts,.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
@@ -21,6 +23,7 @@
 	},
 	"homepage": "https://github.com/CodingCarlos/proyecto-backend-node-platzi#readme",
 	"dependencies": {
+		"axios": "^1.7.2",
 		"bcrypt": "^5.1.1",
 		"dotenv": "^16.4.5",
 		"express": "^4.19.2",
@@ -29,6 +32,8 @@
 		"pg": "^8.12.0",
 		"pino": "^9.3.1",
 		"pino-http": "^10.2.0",
+		"pino-pretty": "^11.2.2",
+		"proyecto-backend-node-platzi": "file:",
 		"swagger-ui-express": "^5.0.1"
 	},
 	"devDependencies": {

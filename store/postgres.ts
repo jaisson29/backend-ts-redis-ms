@@ -1,12 +1,9 @@
 import { Pool, QueryResult } from 'pg';
 import { PG_CONFIG } from '../config';
 import logger from '../api/components/logger';
+import { DBMethods, Item, SelectOptions } from './db';
 
-interface Item {
-	id: number | string;
-}
-
-export class Store {
+export class Store implements DBMethods {
 	private pool: Pool;
 
 	constructor(private schema: string) {
@@ -80,15 +77,7 @@ export class Store {
 		return rows.length > 0 ? rows : null;
 	}
 
-	public async get<T>(
-		table: string,
-		options: Partial<{
-			where: Record<string, { table: string; value: unknown }>;
-			orders: { sortField: string; sortType: 'ASC' | 'DESC' }[];
-			conditions: boolean;
-			join: { table: string; on: { field: string }; alias?: string }[];
-		}> = {},
-	): Promise<T[]> {
+	public async get<T>(table: string, options: Partial<SelectOptions> = {}): Promise<T[]> {
 		const where = options.where ?? {};
 		const orders = options.orders ?? [{ sortField: 'b.id', sortType: 'ASC' }];
 		const conditions = options.conditions ?? true;
@@ -160,15 +149,14 @@ export class Store {
 		});
 	}
 
-	public async remove<T>(table: string, id: Item['id']): Promise<Item['id']> {
+	public async remove<T>(table: string, id: Item['id']): Promise<T[]> {
 		return this.transaction(async () => {
 			const [existing] = await this.get<T>(table, { where: { id: { table: table, value: id } } });
 			if (!existing) {
 				throw new Error('Item not found');
 			}
 			const queryText = `DELETE FROM ${this.applySchema(table)} WHERE id = $1`;
-			await this.query(queryText, [id]);
-			return id;
+			return await this.query<T>(queryText, [id]);
 		});
 	}
 
