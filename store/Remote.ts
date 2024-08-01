@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { DBMethods, Item, SelectOptions } from './db';
-import logger from '../api/components/logger';
+import logger from '../main/components/logger';
 
 export class Store implements DBMethods {
 	private static instance: Store;

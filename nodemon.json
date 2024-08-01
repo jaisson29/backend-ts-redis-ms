@@ -2,7 +2,7 @@
 	"watch": ["**/*"],
 	"ext": "ts,json",
 	"ignore": ["src/**/*.spec.ts", "./node_modules/*"],
-	"exec": "npm run lint & ts-node ./api/index.ts",
+	"exec": "npm run lint & ts-node ./main/index.ts",
 	"env": {
 		"NODE_ENV": "development"
 	},

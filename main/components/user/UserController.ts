@@ -1,4 +1,4 @@
-import { Store } from '../../../store/Remote';
+import { Store } from '../../../store/postgres';
 import { authController } from '../auth';
 import { Auth } from '../auth/AuthModel';
 import logger from '../logger';

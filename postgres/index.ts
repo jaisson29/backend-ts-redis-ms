@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import PostgresRouter from './network';
 import { PG_SERVICE_PORT } from '../config';
 import pinoHttp from 'pino-http';
-import logger from '../api/components/logger';
+import logger from '../main/components/logger';
 
 const app: Application = express();
 

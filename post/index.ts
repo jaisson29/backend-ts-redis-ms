@@ -2,10 +2,10 @@ import { pinoHttp } from 'pino-http';
 import express, { Application } from 'express';
 import { API_POST_PORT } from '../config';
 import postNetwork from './components/post/PostNetwork';
-import SwaggerDoc from '../api/swagger.json';
+import SwaggerDoc from '../main/swagger.json';
 import SwaggerUi from 'swagger-ui-express';
 import { errors } from '../network/Error';
-import logger from '../api/components/logger';
+import logger from '../main/components/logger';
 
 const app: Application = express();
 

@@ -62,4 +62,5 @@ typings/
 
 .vscode
 .vercel
-.dist
+dist/
+

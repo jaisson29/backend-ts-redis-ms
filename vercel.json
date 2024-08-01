@@ -1,31 +1,28 @@
 {
-	"builds": [
-		{
-			"src": "dist/api/index.js",
-			"use": "@vercel/node"
-		},
-		{
-			"src": "dist/postgres/index.js",
-			"use": "@vercel/node"
-		},
-		{
-			"src": "dist/post/index.js",
-			"use": "@vercel/node"
-		}
-	],
-	"routes": [
-		{
-			"src": "/api/v1/auth(.*)",
-			"dest": "dist/api/index.js"
-		},
-		{
-			"src": "/api/v1/user(.*)",
-			"dest": "dist/api/index.js"
-		},
-		{
-			"src": "/api/v1/post(.*)",
-			"dest": "dist/post/index.js"
-		}
-	],
-	"outputDirectory": "dist"
+  "version": 2,
+  "builds": [
+    {
+      "src": "main/index.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "post/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+
+  "routes": [
+    {
+      "src": "/api/v1/auth(.*)",
+      "dest": "/main/index.ts"
+    },
+    {
+      "src": "/api/v1/user(.*)",
+      "dest": "/main/index.ts"
+    },
+    {
+      "src": "/api/v1/post(.*)",
+      "dest": "/post/index.ts"
+    }
+  ]
 }

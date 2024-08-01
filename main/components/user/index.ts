@@ -1,9 +1,9 @@
 import UserController from './UserController';
 import UserSecure from '../middleware/UserSecure';
-import { PG_HOST, PG_SERVICE_PORT } from '../../../config';
-import { Store } from '../../../store/Remote';
+import { PG_SCHEMA } from '../../../config';
+import { Store } from '../../../store/postgres';
 
-const store = Store.getInstance(PG_HOST, PG_SERVICE_PORT);
+const store = new Store(PG_SCHEMA);
 
 export const userController = new UserController(store);
 

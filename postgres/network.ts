@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response, Router } from 'express';
 import ApiResponse from '../network/response';
 import { Store } from '../store/postgres';
-import logger from '../api/components/logger';
+import logger from '../main/components/logger';
 const router: Router = express.Router();
 router.get('/', query);
 router.get('/:table', list);
