@@ -15,4 +15,9 @@ module.exports = [
     script: './dist/post/index.js',
     watch: './dist/post',
   },
+  {
+    name: 'cache-ms',
+    script: './dist/cache/index.js',
+    watch: './dist/cache',
+  },
 ];

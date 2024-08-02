@@ -1,5 +1,6 @@
 import { PoolConfig } from 'pg';
 import { config } from 'dotenv';
+import { RedisClientOptions } from 'redis';
 
 config();
 
@@ -26,5 +27,16 @@ export const PG_CONFIG: PoolConfig =
         ssl: PG_SSL,
       }
     : { connectionString: PG_URL };
+
+export const REDIS_URL = process.env.REDIS_URL ?? '';
+export const REDIS_PASSWORD = process.env.REDIS_PASSWORD ?? '';
+export const REDIS_DB = process.env.REDIS_DB ?? '';
+export const REDIS_USERNAME = process.env.REDIS_USERNAME ?? '';
+export const REDIS_CONFIG: RedisClientOptions = {
+  url: `redis://${REDIS_URL}`,
+  password: REDIS_PASSWORD,
+  username: REDIS_USERNAME,
+};
+export const PG_SERVICE_CACHE = parseInt(process.env.PG_SERVICE_CACHE ?? '3003', 10);
 export const PG_SERVICE_PORT = parseInt(process.env.PG_SERVICE_PORT ?? '3001', 10);
 export const API_POST_PORT = parseInt(process.env.API_POST_PORT ?? '3002', 10);

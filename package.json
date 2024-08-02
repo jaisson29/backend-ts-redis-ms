@@ -34,6 +34,7 @@
 		"pino-http": "^10.2.0",
 		"pino-pretty": "^11.2.2",
 		"proyecto-backend-node-platzi": "file:",
+		"redis": "^4.7.0",
 		"swagger-ui-express": "^5.0.1"
 	},
 	"devDependencies": {
@@ -43,6 +44,7 @@
 		"@types/morgan": "^1.9.9",
 		"@types/node": "^20.14.11",
 		"@types/pg": "^8.11.6",
+		"@types/redis": "^4.0.10",
 		"@types/swagger-ui-express": "^4.1.6",
 		"@typescript-eslint/eslint-plugin": "^7.15.0",
 		"@typescript-eslint/parser": "^7.15.0",
